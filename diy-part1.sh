@@ -6,17 +6,25 @@
 # See /LICENSE for more information.
 #
 # https://github.com/P3TERX/Actions-OpenWrt
-File name: diy-part1.sh
-Description: OpenWrt DIY script part 1 (Before Update feeds)
+# File name: diy-part1.sh
+# Description: OpenWrt DIY script part 1 (Before Update feeds)
 #
 
 # Uncomment a feed source
-sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
+if sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default; then
+    echo "Uncommented helloworld feed source."
+else
+    echo "Failed to uncomment helloworld feed source." >&2
+    exit 1
+fi
 
-# Add a feed source
-#echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
-echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall' >>feeds.conf.default
-
-echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
-echo 'src-git adguardhome https://github.com/rufengsuixing/luci-app-adguardhome' >>feeds.conf.default
-echo 'src-git mosdns https://github.com/sbwml/luci-app-mosdns' >>feeds.conf.default
+# Add feed sources
+{
+    echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall'
+    echo 'src-git openclash https://github.com/vernesong/OpenClash'
+    echo 'src-git adguardhome https://github.com/rufengsuixing/luci-app-adguardhome'
+    echo 'src-git mosdns https://github.com/sbwml/luci-app-mosdns'
+} >> feeds.conf.default && echo "Added feed sources." || {
+    echo "Failed to add feed sources." >&2
+    exit 1
+}
