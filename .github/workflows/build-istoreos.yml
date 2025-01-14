@@ -8,9 +8,12 @@ on:
         description: 'SSH connection to Actions'
         required: false
         default: 'false'
+  #schedule:
+   #- cron: 0 16 * * *
 
 env:
   REPO_URL: https://github.com/istoreos/istoreos
+  # REPO_BRANCH: main
   FEEDS_CONF: feeds.conf
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
@@ -27,15 +30,18 @@ jobs:
     strategy:
       matrix:
         REPO_BRANCH:
-          - istoreos-22.03
+          # - main
+          #- istoreos-22.03
           - istoreos-23.05
         ARCHITECTURE:
+          #- rk33xx
+          #- rk35xx
           - x86
         os:
           - ubuntu-22.04
         include:
-          - REPO_BRANCH: istoreos-23.05
-            ARCHITECTURE: x86-alpha
+          #- REPO_BRANCH: istoreos-23.05
+            #ARCHITECTURE: x86-alpha
             os: ubuntu-22.04
 
       fail-fast: false
@@ -48,7 +54,7 @@ jobs:
       run: |
         echo "若分配的服务器性能不足，务必及时取消，重新运行！"
         echo -e "------------------------------- CPU信息 -------------------------------\n"
-        echo "CPU物理数量:$(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
         echo -e "CPU核心及版本信息: $(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
         echo -e "------------------------------- 内存信息 -------------------------------\n"
         echo "已安装内存详细信息: "
@@ -123,7 +129,7 @@ jobs:
 
     - name: SSH 连接到 Actions
       uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh != 'false') || contains(github.event.action, 'ssh')
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
       env:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -142,9 +148,7 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        set -x  # 开启调试模式
-        make -j$(nproc) || { echo "编译失败"; exit 1; }
-        set +x  # 关闭调试模式
+        make -j$(nproc) || make -j1 || make -j1 V=s
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
         echo "::set-output name=status::success"
 
@@ -190,7 +194,7 @@ jobs:
 
         ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
 
-        🌐 管理地址: 10.0.0.1
+        🌐 管理地址: 192.168.6.1
 
         👤 用户名: root
 
